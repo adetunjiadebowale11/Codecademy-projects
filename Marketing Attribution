@@ -1,0 +1,105 @@
+/*
+Here's the first-touch query, in case you need it
+*/
+select distinct utm_campaign from page_visits;
+select distinct utm_source from page_visits;
+select distinct utm_source, utm_campaign from page_visits;
+
+select distinct page_name from page_visits;
+
+--How many first touches is each campaign responsible for?
+WITH first_touch AS (
+    SELECT user_id,
+        MIN(timestamp) as first_touch_at
+    FROM page_visits
+    GROUP BY user_id),
+    ft_attr as  (
+    select ft.user_id,
+      	ft.first_touch_at,
+    		pv.utm_source,
+    		pv.utm_campaign
+    from first_touch ft
+    join page_visits pv
+      	on ft.user_id=pv.user_id
+      	and ft.first_touch_at=pv.timestamp
+  )
+  select ft_attr.utm_source,
+  ft_attr.utm_campaign,
+  count(*)
+from ft_attr
+group by 1,2
+order by 3 desc;
+ 
+ --How many last touches is each campaign responsible for?
+WITH last_touch AS (
+    SELECT user_id,
+        MAX(timestamp) as last_touch_at
+    FROM page_visits
+    GROUP BY user_id),
+    lt_attr as  (
+    select lt.user_id,
+      	lt.last_touch_at,
+    		pv.utm_source,
+    		pv.utm_campaign
+    from last_touch lt
+    join page_visits pv
+      	on lt.user_id=pv.user_id
+      	and lt.last_touch_at=pv.timestamp
+  )
+  select lt_attr.utm_source,
+  lt_attr.utm_campaign,
+  count(*)
+from lt_attr
+group by 1,2
+order by 3 desc;
+
+--How many visitors make a purchase?
+select distinct count(user_id) from page_visits
+where page_name='4-purchase';
+
+--How many last touches on the purchase page is each campaign -------responsible for?
+WITH last_touch AS (
+    SELECT user_id,
+        MAX(timestamp) as last_touch_at
+    FROM page_visits
+  where page_name='4 - purchase'
+    GROUP BY user_id),
+    lt_attr as  (
+    select lt.user_id,
+      	lt.last_touch_at,
+    		pv.utm_source,
+    		pv.utm_campaign
+    from last_touch lt
+    join page_visits pv
+      	on lt.user_id=pv.user_id
+      	and lt.last_touch_at=pv.timestamp
+  )
+  select lt_attr.utm_source,
+  lt_attr.utm_campaign,
+  count(*)
+from lt_attr
+group by 1,2
+order by 3 desc;
+
+--CoolTShirts can re-invest in 5 campaigns. Given your findings in ----the project, which should they pick and why?    
+1.interview-with-cool-tshirts-founder
+2. getting-to-know-cool-tshirts
+3.ten-crazy-cool-tshirts-facts
+4.weekly-newsletter
+5.retargetting-ad
+
+    
+    
+  
+  
+  
+  
+  /*SELECT ft.user_id,
+    ft.first_touch_at,
+    pv.utm_source,
+		pv.utm_campaign
+FROM first_touch ft
+JOIN page_visits pv
+    ON ft.user_id = pv.user_id
+    AND ft.first_touch_at = pv.timestamp;
+    */
