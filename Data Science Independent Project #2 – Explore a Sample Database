@@ -1,0 +1,43 @@
+-- Top 100 tracks in playlists.
+SELECT tracks.Name, COUNT(*) FROM playlist_track
+LEFT JOIN tracks ON playlist_track.TrackId = tracks.TrackId
+GROUP BY playlist_track.TrackId
+ORDER BY 2 DESC
+LIMIT 100;
+
+-- Top 10 tracks by revenue
+SELECT invoice_items.TrackId, tracks.Name, SUM(Invoice_items.UnitPrice*Invoice_items.Quantity) FROM invoice_items
+LEFT JOIN tracks on invoice_items.TrackId = tracks.TrackId
+GROUP BY 1
+ORDER BY 3 DESC
+LIMIT 10;
+
+-- Top 10 albums by revenue
+SELECT tracks.AlbumId, albums.Title, SUM(Invoice_items.UnitPrice*Invoice_items.Quantity) FROM tracks
+INNER JOIN invoice_items ON tracks.TrackId = invoice_items.TrackId
+INNER JOIN albums ON tracks.AlbumId = albums.AlbumId
+GROUP BY 1
+ORDER BY 3 DESC
+LIMIT 10;
+
+-- Top 10 genres by revenue
+SELECT tracks.GenreId, genres.Name, SUM(Invoice_items.UnitPrice*Invoice_items.Quantity) FROM tracks
+INNER JOIN invoice_items ON tracks.TrackId = invoice_items.TrackId
+INNER JOIN genres ON tracks.GenreId = genres.GenreId
+GROUP BY tracks.GenreId
+ORDER BY 3 DESC
+LIMIT 10;
+
+-- Top 10 countries by revenue
+SELECT invoices.BillingCountry, SUM(Invoice_items.UnitPrice*Invoice_items.Quantity) FROM invoice_items
+JOIN invoices ON invoice_items.InvoiceId = invoices.InvoiceId
+GROUP BY invoices.BillingCountry
+ORDER BY 2 DESC
+LIMIT 10;
+
+-- % of sales by country
+SELECT invoices.BillingCountry, SUM(Invoice_items.UnitPrice*Invoice_items.Quantity )* 100 / (SELECT SUM(Invoice_items.UnitPrice*Invoice_items.Quantity) FROM invoice_items) AS "revenue %" FROM invoice_items
+JOIN invoices ON invoice_items.InvoiceId = invoices.InvoiceId
+GROUP BY invoices.BillingCountry
+ORDER BY 2 DESC
+LIMIT 10;
